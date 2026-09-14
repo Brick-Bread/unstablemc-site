@@ -20,21 +20,6 @@ h1 { margin: 32px 0 0; font-size: 16px; font-weight: normal; line-height: 1.5; }
 .logo { width: min(560px, 100%); }
 .logo img { width: 100%; }
 h1 span { display: inline-block; }
-@keyframes wiggle {
-  0%   { transform: scale(1) rotate(0deg); }
-  7%   { transform: scale(1.05) rotate(-1.5deg); }
-  16%  { transform: scale(1.045) rotate(1.3deg); }
-  28%  { transform: scale(1.035) rotate(-1deg); }
-  44%  { transform: scale(1.025) rotate(.7deg); }
-  64%  { transform: scale(1.012) rotate(-.35deg); }
-  84%  { transform: scale(1.004) rotate(.12deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .logo:hover img, h1:hover span {
-    animation: wiggle 2.6s ease-in-out both;
-  }
-}
 </style>
 </head>
 <body>
@@ -42,5 +27,58 @@ h1 span { display: inline-block; }
 <div class="logo"><img src="logo.svg?v=2" alt="UnstableMC" width="1024" height="314"></div>
 <h1><span>Coming soon.</span></h1>
 </main>
+<script>
+const motionAllowed = matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)');
+for (const [area, target] of [
+  [document.querySelector('.logo'), document.querySelector('.logo img')],
+  [document.querySelector('h1'), document.querySelector('h1 span')]
+]) {
+  let animation;
+  const currentTransform = () => getComputedStyle(target).transform;
+  function play(frames, duration) {
+    animation?.cancel();
+    const next = target.animate(frames, {
+      duration, easing: 'linear', fill: 'forwards'
+    });
+    animation = next;
+    next.onfinish = () => {
+      if (animation === next) {
+        next.cancel();
+        animation = null;
+      }
+    };
+  }
+  area.addEventListener('pointerenter', () => {
+    if (!motionAllowed.matches) return;
+    const start = currentTransform();
+    const poses = [
+      [0, start], [.07, 'scale(1.05) rotate(-1.5deg)'],
+      [.16, 'scale(1.045) rotate(1.3deg)'],
+      [.28, 'scale(1.035) rotate(-1deg)'],
+      [.44, 'scale(1.025) rotate(.7deg)'],
+      [.64, 'scale(1.012) rotate(-.35deg)'],
+      [.84, 'scale(1.004) rotate(.12deg)'],
+      [1, 'scale(1) rotate(0deg)']
+    ];
+    play(poses.map(([offset, transform]) => ({
+      offset, transform, easing: 'ease-in-out'
+    })), 2600);
+  });
+  area.addEventListener('pointerleave', () => {
+    if (!animation) return;
+    const start = currentTransform();
+    play([
+      {transform: start, easing: 'cubic-bezier(.2,.7,.2,1)'},
+      {transform: 'scale(1) rotate(0deg)'}
+    ], 320);
+  });
+  motionAllowed.addEventListener('change', () => {
+    if (!motionAllowed.matches) {
+      animation?.cancel();
+      animation = null;
+    }
+  });
+}
+</script>
 </body>
 </html>
