@@ -16,12 +16,28 @@ body { margin: 0; background: #181818; color: #bdbdbd; font-family: Arial, Helve
 main { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; }
 img { display: block; width: min(560px, 100%); height: auto; }
 h1 { margin: 32px 0 0; font-size: 16px; font-weight: normal; line-height: 1.5; }
+
+.logo { width: min(560px, 100%); }
+.logo img { width: 100%; }
+h1 span { display: inline-block; }
+.logo img, h1 span { transition: scale 180ms ease-out; }
+@keyframes wiggle {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: -1.5deg; }
+  75% { rotate: 1.5deg; }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .logo:hover img, h1:hover span {
+    scale: 1.05;
+    animation: wiggle 650ms ease-in-out infinite;
+  }
+}
 </style>
 </head>
 <body>
 <main>
-<img src="logo.svg?v=2" alt="UnstableMC" width="1024" height="314">
-<h1>Coming soon.</h1>
+<div class="logo"><img src="logo.svg?v=2" alt="UnstableMC" width="1024" height="314"></div>
+<h1><span>Coming soon.</span></h1>
 </main>
 </body>
 </html>
