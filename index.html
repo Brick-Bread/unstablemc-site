@@ -20,16 +20,19 @@ h1 { margin: 32px 0 0; font-size: 16px; font-weight: normal; line-height: 1.5; }
 .logo { width: min(560px, 100%); }
 .logo img { width: 100%; }
 h1 span { display: inline-block; }
-.logo img, h1 span { transition: scale 180ms ease-out; }
 @keyframes wiggle {
-  0%, 100% { rotate: 0deg; }
-  25% { rotate: -1.5deg; }
-  75% { rotate: 1.5deg; }
+  0%   { transform: scale(1) rotate(0deg); }
+  7%   { transform: scale(1.05) rotate(-1.5deg); }
+  16%  { transform: scale(1.045) rotate(1.3deg); }
+  28%  { transform: scale(1.035) rotate(-1deg); }
+  44%  { transform: scale(1.025) rotate(.7deg); }
+  64%  { transform: scale(1.012) rotate(-.35deg); }
+  84%  { transform: scale(1.004) rotate(.12deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .logo:hover img, h1:hover span {
-    scale: 1.05;
-    animation: wiggle 650ms ease-in-out infinite;
+    animation: wiggle 2.6s ease-in-out both;
   }
 }
 </style>
