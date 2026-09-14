@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UnstableMC — Coming Soon</title>
+  <meta name="description" content="UnstableMC is coming soon. A new Minecraft server experience is on the way." />
+  <meta name="theme-color" content="#120018" />
+  <meta property="og:title" content="UnstableMC — Coming Soon" />
+  <meta property="og:description" content="Something unstable is loading. UnstableMC is coming soon." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://unstablemc.gg/" />
+  <style>
+    :root {
+      --bg:#07030b; --panel:rgba(18,8,25,.58); --pink:#f10cff;
+      --purple:#8d16ff; --text:#fff; --muted:#c9b8d3;
+    }
+    * { box-sizing:border-box; }
+    html, body { min-height:100%; margin:0; }
+    body {
+      overflow:hidden; color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(211,0,255,.2), transparent 32rem),
+        linear-gradient(180deg,#0b0410 0%,#050207 100%);
+    }
+    body::before {
+      content:""; position:fixed; inset:0; pointer-events:none; opacity:.18;
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size:32px 32px; transform:perspective(600px) rotateX(60deg) scale(1.5) translateY(35%);
+      transform-origin:center bottom; mask-image:linear-gradient(to top,black,transparent 75%);
+    }
+    .glow {
+      position:fixed; width:28rem; height:28rem; border-radius:50%; filter:blur(90px);
+      background:rgba(231,0,255,.13); animation:float 8s ease-in-out infinite alternate; pointer-events:none;
+    }
+    .glow.one { left:-10rem; top:-10rem; }
+    .glow.two { right:-8rem; bottom:-12rem; animation-delay:-4s; background:rgba(114,0,255,.14); }
+    @keyframes float { to { transform:translate3d(3rem,2rem,0) scale(1.12); } }
+    main {
+      min-height:100svh; display:grid; place-items:center; padding:2rem 1.25rem; position:relative; z-index:1;
+    }
+    .card {
+      width:min(980px,100%); text-align:center; padding:clamp(2rem,6vw,4.5rem);
+      border:1px solid rgba(255,255,255,.08); border-radius:28px;
+      background:linear-gradient(180deg,rgba(30,12,38,.62),rgba(12,5,16,.48));
+      box-shadow:0 30px 100px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.05);
+      backdrop-filter:blur(14px);
+    }
+    .logo {
+      display:block; width:min(760px,100%); height:auto; margin:0 auto 1.8rem;
+      filter:drop-shadow(0 0 24px rgba(239,0,255,.25));
+      animation:logoIn 900ms cubic-bezier(.2,.75,.2,1) both;
+    }
+    @keyframes logoIn {
+      from { opacity:0; transform:translateY(18px) scale(.97); filter:blur(7px) drop-shadow(0 0 0 transparent); }
+      to { opacity:1; transform:none; }
+    }
+    .eyebrow {
+      margin:.3rem 0 .7rem; text-transform:uppercase; letter-spacing:.32em; font-size:.78rem;
+      color:#f0b5ff; font-weight:800;
+    }
+    h1 {
+      margin:0; font-size:clamp(2rem,5vw,4.7rem); line-height:.95; letter-spacing:-.045em;
+      text-shadow:0 0 32px rgba(235,0,255,.18);
+    }
+    p {
+      max-width:620px; margin:1.2rem auto 0; font-size:clamp(1rem,2vw,1.18rem); line-height:1.65; color:var(--muted);
+    }
+    .status {
+      display:inline-flex; align-items:center; gap:.65rem; margin-top:2rem; padding:.72rem 1rem;
+      border:1px solid rgba(255,255,255,.1); border-radius:999px; background:rgba(255,255,255,.045);
+      color:#eadff0; font-size:.9rem; font-weight:700;
+    }
+    .dot {
+      width:.62rem; height:.62rem; border-radius:50%; background:#e929ff;
+      box-shadow:0 0 0 0 rgba(233,41,255,.55); animation:pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      70% { box-shadow:0 0 0 9px rgba(233,41,255,0); }
+      100% { box-shadow:0 0 0 0 rgba(233,41,255,0); }
+    }
+    footer {
+      position:fixed; left:0; right:0; bottom:1rem; text-align:center; z-index:2;
+      color:rgba(255,255,255,.35); font-size:.72rem; letter-spacing:.08em;
+    }
+    @media (max-width:640px) {
+      .card { border-radius:22px; padding:2rem 1.25rem 2.4rem; }
+      .logo { margin-bottom:1.25rem; }
+      footer { display:none; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *,*::before,*::after { animation:none!important; scroll-behavior:auto!important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow one"></div>
+  <div class="glow two"></div>
+  <main>
+    <section class="card" aria-labelledby="title">
+      <img class="logo" alt="UnstableMC" src="LOGO_DATA" />
+      <div class="eyebrow">Minecraft Server</div>
+      <h1 id="title">Coming Soon.</h1>
+      <p>Something unstable is loading. A new Minecraft experience is being built behind the scenes.</p>
+      <div class="status"><span class="dot" aria-hidden="true"></span> Development in progress</div>
+    </section>
+  </main>
+  <footer>UNSTABLEMC.GG</footer>
+</body>
+</html>
