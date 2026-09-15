@@ -21,15 +21,52 @@ h1 { margin: 32px 0 0; font-size: 16px; font-weight: normal; line-height: 1.5; }
 .logo img { width: 100%; }
 h1 span { display: inline-block; }
 body::before { content: ""; position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 calc(90px + var(--charge, 0) * 180px) calc(12px + var(--charge, 0) * 90px) rgb(166 0 230 / calc(.12 + var(--charge, 0) * .73)); }
+.logo, h1 { touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.logo img { -webkit-user-drag: none; }
+@media (pointer: coarse) {
+  .logo { width: min(560px, 90%); }
+  h1 { padding: 12px; margin-top: 20px; }
+}
 </style>
 </head>
 <body>
 <main>
-<div class="logo"><img src="logo.svg?v=2" alt="UnstableMC" width="1024" height="314"></div>
+<div class="logo"><img src="logo.svg?v=2" alt="UnstableMC" draggable="false" width="1024" height="314"></div>
 <h1><span>Coming soon.</span></h1>
 </main>
 <script>
-const motionAllowed = matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)');
+const motionAllowed = matchMedia('(prefers-reduced-motion: no-preference)');
+function bindInteraction(area, start, stop) {
+  let pointer = null, active = false;
+  const begin = () => { if (!active) { active = true; start(); } };
+  const end = () => { if (active) { active = false; stop(); } };
+  area.addEventListener('pointerenter', event => {
+    if (event.pointerType === 'mouse') begin();
+  });
+  area.addEventListener('pointerleave', event => {
+    if (event.pointerType === 'mouse') end();
+  });
+  area.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'mouse' || pointer !== null || !event.isPrimary) return;
+    pointer = event.pointerId;
+    area.setPointerCapture(pointer);
+    begin();
+  });
+  const release = event => {
+    if (event.pointerId !== pointer) return;
+    pointer = null;
+    end();
+  };
+  area.addEventListener('pointerup', release);
+  area.addEventListener('pointercancel', release);
+  area.addEventListener('lostpointercapture', release);
+  area.addEventListener('contextmenu', event => event.preventDefault());
+  window.addEventListener('blur', () => { pointer = null; end(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { pointer = null; end(); }
+  });
+  return { isActive: () => active };
+}
 for (const [area, target] of [
   
   [document.querySelector('h1'), document.querySelector('h1 span')]
@@ -49,7 +86,7 @@ for (const [area, target] of [
       }
     };
   }
-  area.addEventListener('pointerenter', () => {
+  bindInteraction(area, () => {
     if (!motionAllowed.matches) return;
     const start = currentTransform();
     const poses = [
@@ -64,8 +101,7 @@ for (const [area, target] of [
     play(poses.map(([offset, transform]) => ({
       offset, transform, easing: 'ease-in-out'
     })), 2600);
-  });
-  area.addEventListener('pointerleave', () => {
+  }, () => {
     if (!animation) return;
     const start = currentTransform();
     play([
@@ -131,10 +167,10 @@ function explode() {
     picture.style.visibility = '';
     if (motionAllowed.matches) picture.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350 });
     bursting = false;
-    if (!logo.matches(':hover')) locked = false;
+    if (!logoInput.isActive()) locked = false;
   });
 }
-logo.addEventListener('pointerenter', () => {
+const logoInput = bindInteraction(logo, () => {
   if (!motionAllowed.matches || bursting || locked) return;
   cancelAnimationFrame(frame);
   settling?.cancel();
@@ -150,8 +186,7 @@ logo.addEventListener('pointerenter', () => {
     else frame = requestAnimationFrame(build);
   }
   frame = requestAnimationFrame(build);
-});
-logo.addEventListener('pointerleave', () => {
+}, () => {
   if (!bursting) { locked = false; settle(); }
 });
 motionAllowed.addEventListener('change', () => {
