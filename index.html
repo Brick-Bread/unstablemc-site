@@ -20,7 +20,7 @@ h1 { margin: 32px 0 0; font-size: 16px; font-weight: normal; line-height: 1.5; }
 .logo { width: min(560px, 100%); }
 .logo img { width: 100%; }
 h1 span { display: inline-block; }
-body::before { content: ""; position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 90px 12px rgb(166 0 230 / 12%); }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 calc(90px + var(--charge, 0) * 180px) calc(12px + var(--charge, 0) * 90px) rgb(166 0 230 / calc(.12 + var(--charge, 0) * .73)); }
 </style>
 </head>
 <body>
@@ -31,7 +31,7 @@ body::before { content: ""; position: fixed; inset: 0; pointer-events: none; box
 <script>
 const motionAllowed = matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)');
 for (const [area, target] of [
-  [document.querySelector('.logo'), document.querySelector('.logo img')],
+  
   [document.querySelector('h1'), document.querySelector('h1 span')]
 ]) {
   let animation;
@@ -80,6 +80,94 @@ for (const [area, target] of [
     }
   });
 }
+
+const logo = document.querySelector('.logo');
+const picture = logo.querySelector('img');
+let frame, started, settling, bursting = false, locked = false, charge = 0;
+let particles = [];
+function settle() {
+  cancelAnimationFrame(frame);
+  const transform = getComputedStyle(picture).transform;
+  const filter = getComputedStyle(picture).filter;
+  settling?.cancel();
+  picture.style.transform = '';
+  picture.style.filter = '';
+  settling = picture.animate([
+    { transform, filter }, { transform: 'none', filter: 'none' }
+  ], { duration: 400, easing: 'ease-out' });
+  const from = charge, time = performance.now();
+  function fade(now) {
+    charge = from * Math.pow(1 - Math.min((now - time) / 400, 1), 2);
+    document.body.style.setProperty('--charge', charge);
+    if (now - time < 400) frame = requestAnimationFrame(fade);
+  }
+  frame = requestAnimationFrame(fade);
+}
+function explode() {
+  bursting = true;
+  locked = true;
+  const box = logo.getBoundingClientRect();
+  picture.style.visibility = 'hidden';
+  const layer = document.createElement('div');
+  layer.style.cssText = 'position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:10';
+  document.body.append(layer);
+  particles.push(layer);
+  const flights = [];
+  for (let row = 0; row < 3; row++) for (let col = 0; col < 8; col++) {
+    const bit = document.createElement('div');
+    const w = box.width / 8, h = box.height / 3;
+    bit.style.cssText = `position:absolute;left:${box.left + col*w}px;top:${box.top + row*h}px;width:${w + .5}px;height:${h + .5}px;background-image:url("logo.svg?v=2");background-size:${box.width}px ${box.height}px;background-position:${-col*w}px ${-row*h}px`;
+    layer.append(bit);
+    const dx = (col - 3.5) * 65, dy = (row - 1) * 140 - 40;
+    flights.push(bit.animate([
+      { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+      { transform: `translate(${dx}px,${dy}px) rotate(${(col-row)*19}deg) scale(.2)`, opacity: 0 }
+    ], { duration: 700, easing: 'cubic-bezier(.1,.6,.3,1)', fill: 'forwards' }).finished.catch(() => {}));
+  }
+  settle();
+  Promise.all(flights).then(() => {
+    layer.remove();
+    particles = particles.filter(item => item !== layer);
+    picture.style.visibility = '';
+    if (motionAllowed.matches) picture.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350 });
+    bursting = false;
+    if (!logo.matches(':hover')) locked = false;
+  });
+}
+logo.addEventListener('pointerenter', () => {
+  if (!motionAllowed.matches || bursting || locked) return;
+  cancelAnimationFrame(frame);
+  settling?.cancel();
+  const initial = charge;
+  started = performance.now() - initial * 5000;
+  function build(now) {
+    charge = Math.min((now - started) / 5000, 1);
+    document.body.style.setProperty('--charge', charge);
+    const wave = Math.sin((now - started) / 85);
+    picture.style.transform = `scale(${1 + charge * .18}) rotate(${wave * charge * 5}deg)`;
+    picture.style.filter = `drop-shadow(0 0 ${charge * 35}px rgba(190,0,255,${charge * .8}))`;
+    if (charge === 1) explode();
+    else frame = requestAnimationFrame(build);
+  }
+  frame = requestAnimationFrame(build);
+});
+logo.addEventListener('pointerleave', () => {
+  if (!bursting) { locked = false; settle(); }
+});
+motionAllowed.addEventListener('change', () => {
+  if (!motionAllowed.matches) {
+    cancelAnimationFrame(frame);
+    settling?.cancel();
+    particles.forEach(item => item.remove());
+    particles = [];
+    picture.style.transform = '';
+    picture.style.filter = '';
+    picture.style.visibility = '';
+    charge = 0;
+    document.body.style.setProperty('--charge', 0);
+    locked = false;
+  }
+});
 </script>
 </body>
 </html>
